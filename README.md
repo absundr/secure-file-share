@@ -2,6 +2,8 @@
 
 This is a secure file sharing application built with a Django backend and a React frontend.
 
+https://securefileshare.pod42.dev/
+
 ## Project Structure
 
 - `server/`: Django backend application.
