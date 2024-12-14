@@ -46,6 +46,14 @@ To generate a key, run:
 
 Copy the contents into the .env file you created
 
+### Grant exec access to entrypoint.sh
+
+This step is applicable only on Linux, if you are on Windows you can skip this step
+
+```bash
+sudo chmod +x server/entrypoint.sh
+```
+
 ### Build and Run with Docker Compose
 
 ```bash
