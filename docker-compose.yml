@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./server
+      args:
+        - DJANGO_SETTINGS_MODULE=project.settings.prod
+    volumes:
+      - ./server:/app
+      - ./certs:/app/certs
+      - db_data:/app/data
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=project.settings.prod
+      - FILE_ENCRYPTION_MASTER_KEY=${FILE_ENCRYPTION_MASTER_KEY}
+      - PRIVATE_KEY_PATH=/app/certs/server.key
+      - DEBUG=0
+      - SECRET_KEY=${SECRET_KEY}
+  frontend:
+    build: ./client
+    volumes:
+      - ./client:/app
+      - ./certs:/etc/nginx/certs
+    ports:
+      - "3001:443"
+    environment:
+      - VITE_API_URL=https://127.0.0.1:8000
+    depends_on:
+      - backend
+volumes:
+  db_data:
