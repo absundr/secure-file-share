@@ -8,6 +8,11 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
+# Include domain for hosting
+_HOST=os.environ.get("HOST")
+if _HOST:
+    ALLOWED_HOSTS.append(_HOST)
+
 CORS_ORIGIN_WHITELIST = [
     "https://localhost:3001",
 ]

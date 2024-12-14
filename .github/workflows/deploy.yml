@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.KEY }}
+          source: ".,!.git"
+          target: "/data/secure-file-share"
+
+      - name: Deploy with Docker Compose
+        uses: appleboy/ssh-action@master
+        env:
+          FILE_ENCRYPTION_MASTER_KEY: ${{ secrets.FILE_ENCRYPTION_MASTER_KEY }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          envs: FILE_ENCRYPTION_MASTER_KEY,SECRET_KEY,DOMAIN
+          script: |
+            cd /data/secure-file-share
+
+            echo "FILE_ENCRYPTION_MASTER_KEY=$FILE_ENCRYPTION_MASTER_KEY" > .env
+            echo "SECRET_KEY=$SECRET_KEY" >> .env
+            echo "DOMAIN=$DOMAIN" >> .env
+
+            chmod +x server/entrypoint.sh
+
+            echo ${{ secrets.PASS }} | sudo -S docker compose down
+            echo ${{ secrets.PASS }} | sudo -S docker compose up -d --build
+            echo ${{ secrets.PASS }} | sudo -S docker image prune -f
+            echo ${{ secrets.PASS }} | sudo -S docker volume prune -f
